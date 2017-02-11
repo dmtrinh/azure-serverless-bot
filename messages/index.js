@@ -18,8 +18,7 @@ var luisAppId = process.env.LuisAppId;
 var luisAPIKey = process.env.LuisAPIKey;
 var luisAPIHostName = process.env.LuisAPIHostName || 'api.projectoxford.ai';
 
-const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v2/application?id=' + luisAppId + '&subscription-key=' + luisAPIKey;
-console.log(LuisModelUrl);
+const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v2.0/apps/' + luisAppId + '?subscription-key=' + luisAPIKey;
 
 // Create LUIS recognizer that points at our model
 var recognizer = new builder.LuisRecognizer(LuisModelUrl);
@@ -39,7 +38,8 @@ bot.dialog('/', [
             ]);
         var msg = new builder.Message(session).attachments([card]);
         session.send(msg);
-        session.send("This Not-too-dumb-Bot's main purpose is simply to " +
+        session.send(LuisModelUrl);
+        session.send("This DummyBot's main purpose is simply to " +
             "testdrive Microsoft Bot Framework to understand how it works." +
             "The bot currently implements the following: \n\n" +
             "* A simple help menu\n" +
