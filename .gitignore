@@ -39,3 +39,6 @@ messages/node_modules
 
 # Visual Studio Code configuration
 .vscode
+
+# OS X folder attributes
+.DS_Store

@@ -39,15 +39,6 @@ bot.dialog('/', [
         var msg = new builder.Message(session).attachments([card]);
         session.send(msg);
         session.send("DEBUG: " + LuisModelUrl);
-        session.send("This DummyBot's main purpose is simply to " +
-            "testdrive Microsoft Bot Framework to understand how it works." +
-            "The bot currently implements the following: \n\n" +
-            "* A simple help menu\n" +
-            "* A set of global action handlers\n" +
-            "* Integration with Microsoft LUIS\n so it can have basic language understanding\n\n" +
-            "The bot makes use of the ChatConnector which allows it to interface with a " +
-            "variety of channels including Skype."
-        );
         session.beginDialog('/help');
     },
     function (session, results) {
@@ -151,4 +142,3 @@ if (useEmulator) {
 } else {
     module.exports = { default: connector.listen() }
 }
-
