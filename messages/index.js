@@ -38,7 +38,7 @@ bot.dialog('/', [
             ]);
         var msg = new builder.Message(session).attachments([card]);
         session.send(msg);
-        session.send(LuisModelUrl);
+        session.send("DEBUG: " + LuisModelUrl);
         session.send("This DummyBot's main purpose is simply to " +
             "testdrive Microsoft Bot Framework to understand how it works." +
             "The bot currently implements the following: \n\n" +
@@ -91,17 +91,15 @@ bot.dialog('/menu', [
     }
 ]).reloadAction('reloadMenu', null, { matches: /^menu|show menu/i });
 
-var intents = new builder.IntentDialog({ recognizers: [recognizer] });
-bot.dialog('/LUIS', intents);
-
-intents.matches('builtin.intent.places.show_map',
+var intents = new builder.IntentDialog({ recognizers: [recognizer] })
+.matches('builtin.intent.places.show_map',
     function (session, args, next) {
         // Resolve entities passed from LUIS.
         session.send("I think you are trying to find where you are...");
         session.send("Unfortunately, Ducmeister has not taught me how to call Google Maps yet to bring back some results for you.");
     }
-);
-intents.matches('builtin.intent.places.find_place', [
+)
+.matches('builtin.intent.places.find_place', [
     function (session, args, next) {
         session.send("I think you are searching for one or more places...");
         // Resolve and store any entities passed from LUIS.
@@ -109,8 +107,8 @@ intents.matches('builtin.intent.places.find_place', [
         session.send("\ttype of place: %s", place_type != null ? place_type.entity : "Unknown");
         session.send("Unfortunately, Ducmeister has not taught me how to call Google yet to bring back some results for you.");
     }
-]);
-intents.matches('builtin.intent.weather.check_weather', [
+])
+.matches('builtin.intent.weather.check_weather', [
     function (session, args, next) {
         session.send("I think you are trying to check the weather...");
         // Resolve and store any entities passed from LUIS.
@@ -124,14 +122,14 @@ intents.matches('builtin.intent.weather.check_weather', [
     function (session, results) {
         session.send("=== end waterfall.");
     }
-]);
-intents.matches(/\b(quit|end|exit)\b/i,
+])
+.matches(/\b(quit|end|exit)\b/i,
     function (session, args, next) {
         // Resolve entities passed from LUIS.
         session.endDialog("OK... exiting LUIS testdrive!");
     }
-);
-intents.onDefault([
+)
+.onDefault([
     function (session, args, next) {
         session.send("You said: %s", session.message.text);
         session.send("I'm sorry, I don't know how to handle this yet. " +
@@ -140,6 +138,8 @@ intents.onDefault([
         );
     }
 ]);
+
+bot.dialog('/LUIS', intents);
 
 if (useEmulator) {
     var restify = require('restify');
