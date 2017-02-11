@@ -19,6 +19,7 @@ var luisAPIKey = process.env.LuisAPIKey;
 var luisAPIHostName = process.env.LuisAPIHostName || 'api.projectoxford.ai';
 
 const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v2/application?id=' + luisAppId + '&subscription-key=' + luisAPIKey;
+console.log(LuisModelUrl);
 
 // Create LUIS recognizer that points at our model
 var recognizer = new builder.LuisRecognizer(LuisModelUrl);
