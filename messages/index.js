@@ -2,6 +2,13 @@
 var builder = require("botbuilder");
 var botbuilder_azure = require("botbuilder-azure");
 
+// image caption bot
+var captionService = require('./caption-service');
+var needle = require('needle');
+var restify = requrie('restify');
+var url = require('url');
+var validUrl = require('valid-url');
+
 var useEmulator = (process.env.NODE_ENV == 'development');
 
 var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure.BotServiceConnector({
@@ -38,7 +45,6 @@ bot.dialog('/', [
             ]);
         var msg = new builder.Message(session).attachments([card]);
         session.send(msg);
-        session.send("DEBUG: " + LuisModelUrl);
         session.beginDialog('/help');
     },
     function (session, results) {
@@ -64,12 +70,14 @@ bot.dialog('/help', [
 
 bot.dialog('/menu', [
     function (session) {
-        builder.Prompts.choice(session, "Choose an option:", "LUIS|(quit)");
+        builder.Prompts.choice(session, "Choose an option:", "LUIS|Vision|(quit)");
     },
     function (session, results) {
         if (results.response && results.response.entity != '(quit)') {
-            if (results.response.entity == 'LUIS');
+            if (results.response.entity == 'LUIS')
                 session.send("LUIS testdrive... start chatting with the bot!");
+            else if (results.response.entity == 'Vision') 
+                session.send("Vision testdrive... send the bot an image or URL to an image!");
             session.beginDialog('/' + results.response.entity);
         } else {
             // Exit the menu
@@ -131,6 +139,90 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 ]);
 
 bot.dialog('/LUIS', intents);
+
+bot.dialog('/Vision', session => {
+    if (hasImageAttachment(session)) {
+        var stream = getImageStreamFromUrl(session.message.attachments[0]);
+        captionService
+            .getCaptionFromStream(stream)
+            .then(caption => handleSuccessResponse(session, caption))
+            .catch(error => handleErrorResponse(session, error));
+    } else {
+        var imageUrl = parseAnchorTag(session.message.text) || (validUrl.isUri(session.message.text) ? session.message.text : null);
+        if (imageUrl) {
+            captionService
+                .getCaptionFromUrl(imageUrl)
+                .then(caption => handleSuccessResponse(session, caption))
+                .catch(error => handleErrorResponse(session, error));
+        } else {
+            session.send('Did you upload an image? I\'m more of a visual person. Try sending me an image or an image URL');
+        }
+    }
+});
+
+//=========================================================
+// Utilities
+//=========================================================
+const hasImageAttachment = session => {
+    return session.message.attachments.length > 0 &&
+        session.message.attachments[0].contentType.indexOf('image') !== -1;
+};
+
+const getImageStreamFromUrl = attachment => {
+    var headers = {};
+    if (isSkypeAttachment(attachment)) {
+        // The Skype attachment URLs are secured by JwtToken,
+        // you should set the JwtToken of your bot as the authorization header for the GET request your bot initiates to fetch the image.
+        // https://github.com/Microsoft/BotBuilder/issues/662
+        connector.getAccessToken((error, token) => {
+            var tok = token;
+            headers['Authorization'] = 'Bearer ' + token;
+            headers['Content-Type'] = 'application/octet-stream';
+
+            return needle.get(attachment.contentUrl, { headers: headers });
+        });
+    }
+
+    headers['Content-Type'] = attachment.contentType;
+    return needle.get(attachment.contentUrl, { headers: headers });
+};
+
+const isSkypeAttachment = attachment => {
+    return url.parse(attachment.contentUrl).hostname.substr(-'skype.com'.length) === 'skype.com';
+};
+
+/**
+ * Gets the href value in an anchor element.
+ * Skype transforms raw urls to html. Here we extract the href value from the url
+ * @param {string} input Anchor Tag
+ * @return {string} Url matched or null
+ */
+const parseAnchorTag = input => {
+    var match = input.match('^<a href=\"([^\"]*)\">[^<]*</a>$');
+    if (match && match[1]) {
+        return match[1];
+    }
+
+    return null;
+};
+
+//=========================================================
+// Response Handling
+//=========================================================
+const handleSuccessResponse = (session, caption) => {
+    if (caption) {
+        session.send('I think it\'s ' + caption);
+    }
+    else {
+        session.send('Couldn\'t find a caption for this one');
+    }
+
+};
+
+const handleErrorResponse = (session, error) => {
+    session.send('Oops! Something went wrong. Try again later.');
+    console.error(error);
+};
 
 if (useEmulator) {
     var restify = require('restify');
