@@ -11,7 +11,7 @@
     "request": "^2.79.0",
     "restify": "^4.3.0",
     "url": "^0.11.0",
-    "valid-url": "^1.0,9"
+    "valid-url": "^1.0.9"
   },
   "devDependencies": {
       "restify": "^4.1.1"

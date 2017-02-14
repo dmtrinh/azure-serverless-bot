@@ -4,7 +4,7 @@ var botbuilder_azure = require("botbuilder-azure");
 
 // image caption bot
 var captionService = require('./caption-service');
-// var needle = require('needle');
+var needle = require("needle");
 var restify = require('restify');
 var url = require('url');
 var validUrl = require('valid-url');
