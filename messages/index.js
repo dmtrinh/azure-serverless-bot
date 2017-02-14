@@ -154,7 +154,7 @@ bot.dialog('/Vision', session => {
                 .getCaptionFromUrl(imageUrl)
                 .then(caption => handleSuccessResponse(session, caption))
                 .catch(error => handleErrorResponse(session, error));
-        } else if (session.message.text == 'quit') {
+        } else if (session.message.text.toLowerCase() == 'quit') {
             session.endDialog("OK... exiting Vision testdrive!");
         } else {
             session.send('Did you upload an image? I\'m more of a visual person. Try sending me an image or an image URL. To quit this function, enter \'quit\'.');
