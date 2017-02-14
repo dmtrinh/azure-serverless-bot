@@ -76,4 +76,3 @@ const extractCaption = body => {
 
     return null;
 };
-Contact GitHub API Training Shop Blog About
