@@ -77,7 +77,7 @@ bot.dialog('/menu', [
             if (results.response.entity == 'LUIS')
                 session.send("LUIS testdrive... start chatting with the bot!");
             else if (results.response.entity == 'Vision') 
-                session.send("Vision testdrive... send the bot an image or URL to an image!");
+                session.send("Vision testdrive...");
             session.beginDialog('/' + results.response.entity);
         } else {
             // Exit the menu
@@ -157,7 +157,7 @@ bot.dialog('/Vision', session => {
         } else if (session.message.text.toLowerCase() == 'quit') {
             session.endDialog("OK... exiting Vision testdrive!");
         } else {
-            session.send('Did you upload an image? I\'m more of a visual person. Try sending me an image or an image URL. To quit this function, enter \'quit\'.');
+            session.send('Try sending me an image or an image URL. To quit this function, enter \'quit\'.');
         }
     }
 });
