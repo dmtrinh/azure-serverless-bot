@@ -141,11 +141,11 @@ bot.dialog('/LUIS', intents);
 
 bot.dialog('/Vision', session => {
     if (hasImageAttachment(session)) {
-        var stream = getImageStreamFromUrl(session.message.attachments[0]);
+        var stream = getImageStreamFromMessage(session.message);
         captionService
             .getCaptionFromStream(stream)
-            .then(caption => handleSuccessResponse(session, caption))
-            .catch(error => handleErrorResponse(session, error));
+            .then(function (caption) { handleSuccessResponse(session, caption); })
+            .catch(function (error) { handleErrorResponse(session, error); });
     } else {
         var imageUrl = parseAnchorTag(session.message.text) || (validUrl.isUri(session.message.text) ? session.message.text : null);
         if (imageUrl) {
@@ -164,14 +164,15 @@ bot.dialog('/Vision', session => {
 //=========================================================
 // Utilities
 //=========================================================
-const hasImageAttachment = session => {
+function hasImageAttachment(session) {
     return session.message.attachments.length > 0 &&
         session.message.attachments[0].contentType.indexOf('image') !== -1;
-};
+}
 
-const getImageStreamFromUrl = attachment => {
+function getImageStreamFromMessage(message) {
     var headers = {};
-    if (isSkypeAttachment(attachment)) {
+    var attachment = message.attachments[0];
+    if (checkRequiresToken(message)) {
         // The Skype attachment URLs are secured by JwtToken,
         // you should set the JwtToken of your bot as the authorization header for the GET request your bot initiates to fetch the image.
         // https://github.com/Microsoft/BotBuilder/issues/662
@@ -186,11 +187,11 @@ const getImageStreamFromUrl = attachment => {
 
     headers['Content-Type'] = attachment.contentType;
     return needle.get(attachment.contentUrl, { headers: headers });
-};
+}
 
-const isSkypeAttachment = attachment => {
-    return url.parse(attachment.contentUrl).hostname.substr(-'skype.com'.length) === 'skype.com';
-};
+function checkRequiresToken(message) {
+    return message.source === 'skype' || message.source === 'mstreams';
+}
 
 /**
  * Gets the href value in an anchor element.
@@ -198,19 +199,19 @@ const isSkypeAttachment = attachment => {
  * @param {string} input Anchor Tag
  * @return {string} Url matched or null
  */
-const parseAnchorTag = input => {
+function parseAnchorTag(input) {
     var match = input.match('^<a href=\"([^\"]*)\">[^<]*</a>$');
     if (match && match[1]) {
         return match[1];
     }
 
     return null;
-};
+}
 
 //=========================================================
 // Response Handling
 //=========================================================
-const handleSuccessResponse = (session, caption) => {
+function handleSuccessResponse(session, caption) {
     if (caption) {
         session.send('I think it\'s ' + caption);
     }
@@ -218,13 +219,14 @@ const handleSuccessResponse = (session, caption) => {
         session.send('Couldn\'t find a caption for this one');
     }
 
-};
+}
 
-const handleErrorResponse = (session, error) => {
-    //session.send('Oops! Something went wrong. Try again later.');
-    //console.error(error);
-    session.send(error);
-};
+function handleErrorResponse(session, error) {
+    var clientErrorMessage = 'Oops! Something went wrong. Try again later.';
+    if (error.message && error.message.indexOf('Access denied') > -1) {
+        clientErrorMessage += "\n" + error.message;
+    }
+}
 
 if (useEmulator) {
     var restify = require('restify');
