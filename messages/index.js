@@ -221,8 +221,9 @@ const handleSuccessResponse = (session, caption) => {
 };
 
 const handleErrorResponse = (session, error) => {
-    session.send('Oops! Something went wrong. Try again later.');
-    console.error(error);
+    //session.send('Oops! Something went wrong. Try again later.');
+    //console.error(error);
+    session.send(error);
 };
 
 if (useEmulator) {
