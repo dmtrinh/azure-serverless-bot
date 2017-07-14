@@ -151,8 +151,8 @@ bot.dialog('/Vision', session => {
         if (imageUrl) {
             captionService
                 .getCaptionFromUrl(imageUrl)
-                .then(caption => handleSuccessResponse(session, caption))
-                .catch(error => handleErrorResponse(session, error));
+                .then(function (caption) { handleSuccessResponse(session, caption); })
+                .catch(function (error) { handleErrorResponse(session, error); });
         } else if (session.message.text.toLowerCase() == 'quit') {
             session.endDialog("OK... exiting Vision testdrive!");
         } else {
@@ -176,7 +176,7 @@ function getImageStreamFromMessage(message) {
         // The Skype attachment URLs are secured by JwtToken,
         // you should set the JwtToken of your bot as the authorization header for the GET request your bot initiates to fetch the image.
         // https://github.com/Microsoft/BotBuilder/issues/662
-        connector.getAccessToken((error, token) => {
+        connector.getAccessToken(function (error, token) {
             var tok = token;
             headers['Authorization'] = 'Bearer ' + token;
             headers['Content-Type'] = 'application/octet-stream';
@@ -226,6 +226,9 @@ function handleErrorResponse(session, error) {
     if (error.message && error.message.indexOf('Access denied') > -1) {
         clientErrorMessage += "\n" + error.message;
     }
+
+    console.error(error);
+    session.send(clientErrorMessage);    
 }
 
 if (useEmulator) {
