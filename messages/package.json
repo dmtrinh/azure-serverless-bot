@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "botbuilder": "^3.4.2",
+    "botbuilder": "^3.5",
     "botbuilder-azure": "0.0.1",
     "dotenv-extended": "^1.0.4",
     "needle": "^1.4.3",
