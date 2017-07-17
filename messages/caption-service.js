@@ -18,7 +18,6 @@ exports.getCaptionFromStream = stream => {
             const requestData = {
                 url: VISION_URL,
                 encoding: 'binary',
-                json: true,
                 headers: { 
                     'content-type': 'application/octet-stream',
                     'Ocp-Apim-Subscription-Key':  process.env.MICROSOFT_VISION_API_KEY 
