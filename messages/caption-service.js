@@ -5,7 +5,7 @@
 
 const request = require('request').defaults({ encoding: null });
 
-const VISION_URL = 'https://westus.api.cognitive.microsoft.com/vision/v1.0/analyze/?visualFeatures=Description&form=BCSIMG';
+const VISION_URL = 'https://westus.api.cognitive.microsoft.com/vision/v1.0/analyze?visualFeatures=Description';
 
 /** 
  *  Gets the caption of the image from an image stream
@@ -18,8 +18,11 @@ exports.getCaptionFromStream = stream => {
             const requestData = {
                 url: VISION_URL,
                 encoding: 'binary',
-                headers: { 'content-type': 'application/octet-stream',
-                    'Ocp-Apim-Subscription-Key':  process.env.MICROSOFT_VISION_API_KEY }
+                json: true,
+                headers: { 
+                    'content-type': 'application/octet-stream',
+                    'Ocp-Apim-Subscription-Key':  process.env.MICROSOFT_VISION_API_KEY 
+                }
             };
 
             stream.pipe(request.post(requestData, (error, response, body) => {
